@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add Search This Area button
-    const searchAreaButton = L.control({position: 'bottomleft'}); // Changed to bottomleft
+    const searchAreaButton = L.control({position: 'bottomleft'});
     searchAreaButton.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'search-area-button');
         this._div.innerHTML = '<button>Search This Area</button>';
@@ -52,6 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return this._div;
     };
     searchAreaButton.addTo(map);
+
+    // Close button for directions panel
+    document.querySelector('#directions-panel .close-button').addEventListener('click', closeDirectionsPanel);
 
 
     getLocation();
@@ -201,10 +204,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             directionsLayer = directionsCache[cacheKey];
             directionsLayer.addTo(map);
+            showDirections(directionsCache[cacheKey].instructions); // Show cached directions
+
             return;
         }
 
-        const osrmUrl = `http://router.project-osrm.org/route/v1/driving/${userLon},${userLat};${gritBinLon},${gritBinLat}?overview=full&geometries=geojson`;
+        const osrmUrl = `http://router.project-osrm.org/route/v1/driving/${userLon},${userLat};${gritBinLon},${gritBinLat}?overview=full&geometries=geojson&steps=true`; // Request steps
 
         try {
             const response = await fetch(osrmUrl);
@@ -214,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (data.routes && data.routes.length > 0) {
-                // Remove existing layer if it exists
+                 // Remove existing layer if it exists
                 if (directionsLayer) {
                     map.removeLayer(directionsLayer);
                 }
@@ -226,7 +231,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 directionsLayer.addTo(map);
 
-                directionsCache[cacheKey] = directionsLayer; // Cache the layer
+                // Extract and display step-by-step instructions
+                const steps = data.routes[0].legs[0].steps;
+                const instructions = steps.map((step, index) => {
+                    return {
+                      distance: step.distance,
+                      instruction: step.maneuver.instruction,
+                    };
+                });
+
+
+                directionsCache[cacheKey] = {
+                    layer: directionsLayer,
+                    instructions: instructions
+                }; // Cache layer and instructions
+                showDirections(instructions);
+
+                directionsLayer.on('click', () => {
+                    showDirections(instructions);
+                });
 
             } else {
                 displayMessage("No route found.");
@@ -236,6 +259,23 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error fetching directions:", error);
             displayMessage("Error fetching directions.");
         }
+    }
+    function showDirections(instructions) {
+        const directionsContent = document.getElementById('directions-content');
+        directionsContent.innerHTML = ''; // Clear previous directions
+
+        const ol = document.createElement('ol');
+        instructions.forEach(instruction => {
+            const li = document.createElement('li');
+            li.textContent = `${instruction.instruction} (${instruction.distance} m)`;
+            ol.appendChild(li);
+        });
+        directionsContent.appendChild(ol);
+        document.getElementById('directions-panel').classList.add('open');
+    }
+
+    function closeDirectionsPanel() {
+        document.getElementById('directions-panel').classList.remove('open');
     }
 
     function displayMessage(message) {
