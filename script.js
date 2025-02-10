@@ -157,6 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 gritBinMarkers.push(marker);
                 marker.addTo(map);
 
+                // Create popup content with Google Maps link
+                const popupContent = `
+                    Grit Bin<br>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${gritBinLat},${gritBinLon}" target="_blank">Get Directions (Google Maps)</a>
+                `;
+                marker.bindPopup(popupContent);
+
                 if (userLocation) {
                     const distance = calculateDistance(userLocation[0], userLocation[1], gritBinLat, gritBinLon);
                     if (distance < nearestDistance) {
@@ -172,6 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 nearestGritBinLat = currentNearestGritBinLat;
                 nearestGritBinLon = currentNearestGritBinLon;
                 nearestGritBinMarker = L.marker([nearestGritBinLat, nearestGritBinLon], { icon: greenIcon }).addTo(map);
+                // Create popup content with Google Maps link
+                const popupContent = `
+                    Grit Bin<br>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${nearestGritBinLat},${nearestGritBinLon}" target="_blank">Get Directions (Google Maps)</a>
+                `;
+                nearestGritBinMarker.bindPopup(popupContent);
 
                 // Adjust map view ONLY on the first time
                 if (!initialZoomDone) {
