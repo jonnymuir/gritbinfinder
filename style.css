@@ -60,8 +60,18 @@ html, body {
 .leaflet-routing-container {
     background-color: white; /* Ensure the routing container has a background */
     z-index: 1000; /* Make sure it's above other elements */
+    height: 100%; /* Full height */
+    max-height: none; /* Override max-height */
+    top: 0; /* Ensure it starts at the top */
+    bottom: 0; /* Ensure it extends to the bottom */
 }
 .leaflet-routing-alt {
     overflow-y: auto;
-    max-height: 300px;
+    max-height: calc(100% - 60px); /* Adjust for the top bar height if needed */
+    height: auto;
+}
+
+.leaflet-routing-geocoders, .leaflet-routing-error {
+    height: auto;
+    max-height: 60px;
 }
