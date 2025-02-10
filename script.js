@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let gritBinMarkers = []; // Array to store grit bin markers
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> | Directions from <a href="http://project-osrm.org/">OSRM</a>',
     }).addTo(map);
 
     // Add Directions button (modified for LRM)
