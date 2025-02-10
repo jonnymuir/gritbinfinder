@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let gritBinMarkers = []; // Array to store grit bin markers
     let userMarker = null; // Store the user's location marker
     let nearestGritBinMarker = null; // Store the nearest grit bin's marker
+    let initialZoomDone = false; // Flag to track initial zoom
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> | Directions from <a href="http://project-osrm.org/">OSRM</a>',
@@ -172,12 +173,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 nearestGritBinLon = currentNearestGritBinLon;
                 nearestGritBinMarker = L.marker([nearestGritBinLat, nearestGritBinLon], { icon: greenIcon }).addTo(map);
 
-                // Adjust map view to include user and nearest grit bin
-                const bounds = L.latLngBounds(userLocation, [nearestGritBinLat, nearestGritBinLon]);
-                map.fitBounds(bounds, {
-                    padding: [50, 50], // Add some padding around the markers
-                    maxZoom: 15 // Limit the maximum zoom level
-                });
+                // Adjust map view ONLY on the first time
+                if (!initialZoomDone) {
+                    const bounds = L.latLngBounds(userLocation, [nearestGritBinLat, nearestGritBinLon]);
+                    // Calculate 10% extra padding based on map dimensions
+                    const mapWidth = map.getSize().x;
+                    const mapHeight = map.getSize().y;
+                    const extraPaddingX = Math.round(mapWidth * 0.1);
+                    const extraPaddingY = Math.round(mapHeight * 0.1);
+
+                    map.fitBounds(bounds, {
+                        padding: [50 + extraPaddingY, 50 + extraPaddingX], // Add original padding + 10%
+                        maxZoom: 15 // Limit the maximum zoom level
+                    });
+                    initialZoomDone = true; // Set the flag
+                }
             }
 
         } catch (error) {
