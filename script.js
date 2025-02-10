@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let nearestGritBinLon = null;
     let routingControl = null; // Store the routing control instance
     const directionsCache = {};
-    let gritBinMarkers = []; // Array to store grit bin markers
+    let markers = L.markerClusterGroup(); // Create a marker cluster group
+    let gritBinMarkers = []; // Array to store grit bin markers, keep this for other uses.
     let userMarker = null; // Store the user's location marker
     let nearestGritBinMarker = null; // Store the nearest grit bin's marker
     let initialZoomDone = false; // Flag to track initial zoom
@@ -143,6 +144,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 nearestGritBinMarker = null;
             }
 
+            // Remove existing marker cluster layer, if it exists
+            if (map.hasLayer(markers)) {
+                map.removeLayer(markers);
+            }
+            markers = L.markerClusterGroup(); // Re-initialize the cluster group
+
+
             if (data.elements.length === 0) {
                 displayMessage("No grit bins found in this area.");
                 return;
@@ -156,8 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const gritBinLat = element.lat;
                 const gritBinLon = element.lon;
                 const marker = L.marker([gritBinLat, gritBinLon]);
-                gritBinMarkers.push(marker);
-                marker.addTo(map);
+                gritBinMarkers.push(marker); //keep pushing to this array for use elsewhere
+                // marker.addTo(map); // Don't add to map directly, add to cluster group
 
                 // Create popup content
                 const popupContent = `
@@ -167,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <a href="https://www.openstreetmap.org/node/${element.id}" target="_blank">View on OpenStreetMap</a>
                 `;
                 marker.bindPopup(popupContent);
+
+                markers.addLayer(marker); // Add the marker to the cluster group
 
                 if (userLocation) {
                     const distance = calculateDistance(userLocation[0], userLocation[1], gritBinLat, gritBinLon);
@@ -212,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     initialZoomDone = true; // Set the flag
                 }
             }
+            map.addLayer(markers); // Add the cluster group to the map
 
         } catch (error) {
             console.error("Error fetching grit bins:", error);
@@ -220,10 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearGritBinMarkers() {
-        gritBinMarkers.forEach(marker => {
-            map.removeLayer(marker);
-        });
-        gritBinMarkers = [];
+        markers.clearLayers(); // Clear markers from the cluster group
+        gritBinMarkers = []; // Clear the gritBinMarkers array
     }
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
