@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
-            console.log("Overpass API response:", data); // Debugging: Log the response
+            // console.log("Overpass API response:", data); // Debugging: Log the response
 
             clearGritBinMarkers();
             if (nearestGritBinMarker) {
@@ -161,7 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Create popup content with Google Maps link AND OSM View link
                 const popupContent = `
-                    Grit Bin<br>
                     <a href="https://www.google.com/maps/dir/?api=1&destination=${gritBinLat},${gritBinLon}" target="_blank">Get Directions (Google Maps)</a><br>
                     <a href="https://www.openstreetmap.org/node/${element.id}" target="_blank">View on OpenStreetMap</a>
                 `;
@@ -188,7 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Create popup content with Google Maps link AND OSM View link
                 const popupContent = `
-                    Grit Bin<br>
                     <a href="https://www.google.com/maps/dir/?api=1&destination=${nearestGritBinLat},${nearestGritBinLon}" target="_blank">Get Directions (Google Maps)</a><br>
                     <a href="https://www.openstreetmap.org/node/${nearestGritBin ? nearestGritBin.id : ''}" target="_blank">View on OpenStreetMap</a>
                 `;
