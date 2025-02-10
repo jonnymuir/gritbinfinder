@@ -44,6 +44,9 @@ html, body {
 
 .leaflet-control-container .leaflet-bottom {
     display: flex;
-    justify-content: space-between; /* Distributes space between buttons */
+    /* Removed justify-content: space-between; */
 }
 
+.leaflet-control-container .leaflet-bottom button {
+    margin-right: 5px; /* Add some spacing between buttons */
+}

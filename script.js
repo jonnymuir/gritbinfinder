@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add Search This Area button
-    const searchAreaButton = L.control({position: 'topright'});
+    const searchAreaButton = L.control({position: 'bottomleft'}); // Changed to bottomleft
     searchAreaButton.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'search-area-button');
         this._div.innerHTML = '<button>Search This Area</button>';
