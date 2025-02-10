@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (directionsLayer) {
                 map.removeLayer(directionsLayer);
             }
-            directionsLayer = directionsCache[cacheKey];
+            directionsLayer = directionsCache[cacheKey].layer; // Access the .layer property
             directionsLayer.addTo(map);
             showDirections(directionsCache[cacheKey].instructions); // Show cached directions
 
