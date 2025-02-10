@@ -220,6 +220,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     serviceUrl: 'http://router.project-osrm.org/route/v1'
                 }),
                 show: true,
+                createMarker: function(i, wp, nWps) {
+                    // Only create default markers for waypoints that are NOT the user's location
+                    if (i === 0 && userMarker) { // Check if it's the first waypoint (user location)
+                        return null; // Don't create a marker, keep the existing userMarker
+                    } else {
+                        // For other waypoints (e.g., the grit bin), use the default marker
+                        return L.marker(wp.latLng, {
+                            draggable: true,
+                            icon: blueIcon // Use a blue icon for the grit bin
+                        });
+                    }
+                }
             }).addTo(map);
 
             routingControl.on('routesfound', (e) => {
@@ -235,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
             routingControl.setWaypoints([userLatLng, gritBinLatLng]);
         }
     }
-
     function displayMessage(message) {
         const messageDiv = L.DomUtil.create('div', 'info-message');
         messageDiv.innerHTML = message;
