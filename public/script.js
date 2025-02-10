@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let initialZoomDone = false; // Flag to track initial zoom
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> | Directions from <a href="http://project-osrm.org/">OSRM</a>',
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> | Directions from <a href="https://project-osrm.org/">OSRM</a>',
     }).addTo(map);
 
     // Add Directions button (modified for LRM)
@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 waypoints: [userLatLng, gritBinLatLng],
                 routeWhileDragging: false, // Disable rerouting while dragging
                 router: L.Routing.osrmv1({
-                    serviceUrl: 'http://router.project-osrm.org/route/v1'
+                    serviceUrl: 'https://router.project-osrm.org/route/v1'
                 }),
                 show: true,
                 createMarker: function(i, wp, nWps) {
