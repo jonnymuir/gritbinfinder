@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const directionsCache = {};
     let gritBinMarkers = []; // Array to store grit bin markers
     let userMarker = null; // Store the user's location marker
+    let nearestGritBinMarker = null; // Store the nearest grit bin's marker
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> | Directions from <a href="http://project-osrm.org/">OSRM</a>',
@@ -134,6 +135,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
             clearGritBinMarkers();
+            if (nearestGritBinMarker) {
+                map.removeLayer(nearestGritBinMarker);
+                nearestGritBinMarker = null;
+            }
 
             if (data.elements.length === 0) {
                 displayMessage("No grit bins found in this area.");
@@ -161,9 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            if (userLocation) {
+            // Set the nearest grit bin marker's icon and store the marker
+            if (userLocation && currentNearestGritBinLat && currentNearestGritBinLon) {
                 nearestGritBinLat = currentNearestGritBinLat;
                 nearestGritBinLon = currentNearestGritBinLon;
+                nearestGritBinMarker = L.marker([nearestGritBinLat, nearestGritBinLon], { icon: greenIcon }).addTo(map);
             }
 
         } catch (error) {
@@ -224,7 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Only create default markers for waypoints that are NOT the user's location
                     if (i === 0 && userMarker) { // Check if it's the first waypoint (user location)
                         return null; // Don't create a marker, keep the existing userMarker
-                    } else {
+                    } else if (i === 1 && nearestGritBinMarker) {
+                        // Don't draw over the top of the green marker
+                        return null;
+                    }
+                     else {
                         // For other waypoints (e.g., the grit bin), use the default marker
                         return L.marker(wp.latLng, {
                             draggable: true,
