@@ -159,9 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 gritBinMarkers.push(marker);
                 marker.addTo(map);
 
-                // Create popup content with Google Maps link AND OSM View link
+                // Create popup content
                 const popupContent = `
+                    Grit Bin<br>
                     <a href="https://www.google.com/maps/dir/?api=1&destination=${gritBinLat},${gritBinLon}" target="_blank">Get Directions (Google Maps)</a><br>
+                    <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${gritBinLat},${gritBinLon}" target="_blank">Check if it's there with Google Streetview</a><br>
                     <a href="https://www.openstreetmap.org/node/${element.id}" target="_blank">View on OpenStreetMap</a>
                 `;
                 marker.bindPopup(popupContent);
@@ -185,9 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Find the nearest grit bin in the data.elements array
                 const nearestGritBin = data.elements.find(element => element.lat === nearestGritBinLat && element.lon === nearestGritBinLon);
 
-                // Create popup content with Google Maps link AND OSM View link
+                // Create popup content
                 const popupContent = `
+                    Grit Bin<br>
                     <a href="https://www.google.com/maps/dir/?api=1&destination=${nearestGritBinLat},${nearestGritBinLon}" target="_blank">Get Directions (Google Maps)</a><br>
+                    <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${nearestGritBinLat},${nearestGritBinLon}" target="_blank">Check if it's there with Google Streetview</a><br>
                     <a href="https://www.openstreetmap.org/node/${nearestGritBin ? nearestGritBin.id : ''}" target="_blank">View on OpenStreetMap</a>
                 `;
                 nearestGritBinMarker.bindPopup(popupContent);
