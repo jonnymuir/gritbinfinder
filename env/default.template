@@ -1,0 +1,19 @@
+# Set up API keys based on your preferred provider:
+
+# For Anthropic Claude models (recommended)
+export ANTHROPIC_API_KEY=your_api_key_here
+
+# For OpenAI models
+export OPENAI_API_KEY=your_api_key_here
+
+# For OpenRouter provider (optional)
+export OPENROUTER_API_KEY=your_api_key_here
+
+# For OpenAI-compatible providers (optional)
+export OPENAI_API_BASE=your_api_base_url
+
+# For Gemini provider (optional)
+export GEMINI_API_KEY=your_api_key_here
+
+# For web research capabilities
+export TAVILY_API_KEY=your_api_key_here

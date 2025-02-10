@@ -1,2 +1,4 @@
 .vscode
-.aider*
+.aider.tags*
+.aider.input.history
+env/default
