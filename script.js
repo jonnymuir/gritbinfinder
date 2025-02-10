@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let routingControl = null; // Store the routing control instance
     const directionsCache = {};
     let gritBinMarkers = []; // Array to store grit bin markers
+    let userMarker = null; // Store the user's location marker
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> | Directions from <a href="http://project-osrm.org/">OSRM</a>',
@@ -76,6 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 (position) => {
                     userLocation = [position.coords.latitude, position.coords.longitude];
                     map.setView(userLocation, 15);
+
+                    // Add user location marker (only if it doesn't exist)
+                    if (!userMarker) {
+                        userMarker = L.marker(userLocation, { icon: redIcon }).addTo(map);
+                    }
+
                     findGritBins(position.coords.latitude, position.coords.longitude);
                 },
                 (error) => {
