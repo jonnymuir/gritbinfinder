@@ -234,9 +234,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Extract and display step-by-step instructions
                 const steps = data.routes[0].legs[0].steps;
                 const instructions = steps.map((step, index) => {
+                    //Corrected instruction retrieval
                     return {
                       distance: step.distance,
-                      instruction: step.maneuver.instruction,
+                      instruction: `${step.maneuver.verbal_pre_transition_instruction} ${step.maneuver.modifier ? `(${step.maneuver.modifier})` : ''}`.trim(),
                     };
                 });
 
