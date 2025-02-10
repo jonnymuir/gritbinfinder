@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let nearestGritBinLon = null;
     let directionsLayer = null; // Store the directions layer
     const directionsCache = {};
+    let gritBinMarkers = []; // Array to store grit bin markers
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -42,6 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('help-popup').style.display = 'none';
     });
 
+    // Add Search This Area button
+    const searchAreaButton = L.control({position: 'topright'});
+    searchAreaButton.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'search-area-button');
+        this._div.innerHTML = '<button>Search This Area</button>';
+        this._div.firstChild.addEventListener('click', searchCurrentArea);
+        return this._div;
+    };
+    searchAreaButton.addTo(map);
+
 
     getLocation();
 
@@ -76,13 +87,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    async function findGritBins(latitude, longitude) {
+    async function findGritBins(latitude, longitude, bounds = null) {
         const overpassUrl = 'https://overpass-api.de/api/interpreter';
-        const query = `
-            [out:json];
-            node["amenity"="grit_bin"](around:8047,${latitude},${longitude});
-            out;
-        `;
+        let query;
+
+        if (bounds) {
+            // Use bounding box
+            query = `
+                [out:json];
+                node["amenity"="grit_bin"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
+                out;
+            `;
+        } else {
+            // Use around
+            query = `
+                [out:json];
+                node["amenity"="grit_bin"](around:8047,${latitude},${longitude});
+                out;
+            `;
+        }
 
         try {
             const response = await fetch(overpassUrl, {
@@ -95,33 +118,53 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
+            clearGritBinMarkers(); // Clear existing markers
 
             if (data.elements.length === 0) {
-                displayMessage("No grit bins found within 5 miles.");
+                displayMessage("No grit bins found in this area.");
                 return;
             }
 
             let nearestDistance = Infinity;
+            let currentNearestGritBinLat = null;
+            let currentNearestGritBinLon = null;
 
 
             data.elements.forEach(element => {
                 const gritBinLat = element.lat;
                 const gritBinLon = element.lon;
-                L.marker([gritBinLat, gritBinLon]).addTo(map);
+                const marker = L.marker([gritBinLat, gritBinLon]);
+                gritBinMarkers.push(marker); // Store marker
+                marker.addTo(map);
 
-                // Calculate distance
-                const distance = calculateDistance(latitude, longitude, gritBinLat, gritBinLon);
-                if (distance < nearestDistance) {
-                    nearestDistance = distance;
-                    nearestGritBinLat = gritBinLat;
-                    nearestGritBinLon = gritBinLon;
+                // Calculate distance only if user location is available
+                if(userLocation) {
+                    const distance = calculateDistance(userLocation[0], userLocation[1], gritBinLat, gritBinLon);
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                        currentNearestGritBinLat = gritBinLat;
+                        currentNearestGritBinLon = gritBinLon;
+                    }
                 }
             });
+
+            // Update nearest grit bin only if user location is available
+            if (userLocation) {
+                nearestGritBinLat = currentNearestGritBinLat;
+                nearestGritBinLon = currentNearestGritBinLon;
+            }
 
         } catch (error) {
             console.error("Error fetching grit bins:", error);
             displayMessage("Error fetching grit bin data.");
         }
+    }
+
+    function clearGritBinMarkers() {
+        gritBinMarkers.forEach(marker => {
+            map.removeLayer(marker);
+        });
+        gritBinMarkers = []; // Reset the array
     }
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -208,5 +251,10 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             map.getContainer().removeChild(messageDiv);
         }, 5000);
+    }
+
+    function searchCurrentArea() {
+        const bounds = map.getBounds();
+        findGritBins(null, null, bounds);
     }
 });
