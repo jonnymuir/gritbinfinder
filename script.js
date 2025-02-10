@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let userLocation = null;
     let nearestGritBinLat = null;
     let nearestGritBinLon = null;
-    let directionsLayer = null; // Store the directions layer
+    let routingControl = null; // Store the routing control instance
     const directionsCache = {};
     let gritBinMarkers = []; // Array to store grit bin markers
 
@@ -11,23 +11,22 @@ document.addEventListener('DOMContentLoaded', () => {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Add Directions button
-    const directionsButton = L.control({position: 'bottomleft'});
+    // Add Directions button (modified for LRM)
+    const directionsButton = L.control({ position: 'bottomleft' });
     directionsButton.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'directions-button');
         this._div.innerHTML = '<button>Directions</button>';
         this._div.firstChild.addEventListener('click', () => {
             if (userLocation && nearestGritBinLat && nearestGritBinLon) {
-                getDirections(nearestGritBinLat, nearestGritBinLon);
+                setWaypoints();
             }
         });
         return this._div;
     };
     directionsButton.addTo(map);
 
-
     // Add Help button
-    const helpButton = L.control({position: 'bottomleft'});
+    const helpButton = L.control({ position: 'bottomleft' });
     helpButton.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'help-button');
         this._div.innerHTML = '<button>Help</button>';
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Add Search This Area button
-    const searchAreaButton = L.control({position: 'bottomleft'});
+    const searchAreaButton = L.control({ position: 'bottomleft' });
     searchAreaButton.onAdd = function (map) {
         this._div = L.DomUtil.create('div', 'search-area-button');
         this._div.innerHTML = '<button>Search This Area</button>';
@@ -52,9 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return this._div;
     };
     searchAreaButton.addTo(map);
-
-    // Close button for directions panel
-    document.querySelector('#directions-panel .close-button').addEventListener('click', closeDirectionsPanel);
 
 
     getLocation();
@@ -70,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 (error) => {
                     console.error("Geolocation error:", error);
                     displayLocationError();
-
                 }
             );
         } else {
@@ -78,31 +73,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     function displayLocationError() {
-        // Simplified error display, directly on the map.  Could be a styled div.
         const errorDiv = L.DomUtil.create('div', 'location-error');
         errorDiv.innerHTML = 'Location services are unavailable.';
         errorDiv.style.backgroundColor = 'white';
         errorDiv.style.padding = '10px';
         errorDiv.style.border = '1px solid red';
-        map.getContainer().appendChild(errorDiv); // Append to the map container
+        map.getContainer().appendChild(errorDiv);
     }
-
 
     async function findGritBins(latitude, longitude, bounds = null) {
         const overpassUrl = 'https://overpass-api.de/api/interpreter';
         let query;
 
         if (bounds) {
-            // Use bounding box
             query = `
                 [out:json];
                 node["amenity"="grit_bin"](${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()});
                 out;
             `;
         } else {
-            // Use around
             query = `
                 [out:json];
                 node["amenity"="grit_bin"](around:8047,${latitude},${longitude});
@@ -121,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
-            clearGritBinMarkers(); // Clear existing markers
+            clearGritBinMarkers();
 
             if (data.elements.length === 0) {
                 displayMessage("No grit bins found in this area.");
@@ -132,16 +122,14 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentNearestGritBinLat = null;
             let currentNearestGritBinLon = null;
 
-
             data.elements.forEach(element => {
                 const gritBinLat = element.lat;
                 const gritBinLon = element.lon;
                 const marker = L.marker([gritBinLat, gritBinLon]);
-                gritBinMarkers.push(marker); // Store marker
+                gritBinMarkers.push(marker);
                 marker.addTo(map);
 
-                // Calculate distance only if user location is available
-                if(userLocation) {
+                if (userLocation) {
                     const distance = calculateDistance(userLocation[0], userLocation[1], gritBinLat, gritBinLon);
                     if (distance < nearestDistance) {
                         nearestDistance = distance;
@@ -151,7 +139,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Update nearest grit bin only if user location is available
             if (userLocation) {
                 nearestGritBinLat = currentNearestGritBinLat;
                 nearestGritBinLon = currentNearestGritBinLon;
@@ -167,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gritBinMarkers.forEach(marker => {
             map.removeLayer(marker);
         });
-        gritBinMarkers = []; // Reset the array
+        gritBinMarkers = [];
     }
 
     function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -176,111 +163,58 @@ document.addEventListener('DOMContentLoaded', () => {
         const φ2 = lat2 * Math.PI / 180;
         const Δφ = (lat2 - lat1) * Math.PI / 180;
         const Δλ = (lon2 - lon1) * Math.PI / 180;
-
         const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c; // Distance in meters
+        return R * c;
     }
 
-
-    async function getDirections(gritBinLat, gritBinLon) {
-        if (!userLocation) {
-            displayMessage("User location not available.");
-            return;
+    function setWaypoints() {
+        if (!userLocation || !nearestGritBinLat || !nearestGritBinLon) {
+            return; // Should not happen, but check for safety
         }
 
-        const userLat = userLocation[0];
-        const userLon = userLocation[1];
-        const cacheKey = `${userLat},${userLon}-${gritBinLat},${gritBinLon}`;
+        const userLatLng = L.latLng(userLocation[0], userLocation[1]);
+        const gritBinLatLng = L.latLng(nearestGritBinLat, nearestGritBinLon);
+        const cacheKey = `${userLocation[0]},${userLocation[1]}-${nearestGritBinLat},${nearestGritBinLon}`;
 
         if (directionsCache[cacheKey]) {
+            // Use cached route
             console.log("Using cached directions");
-            // Remove existing layer if it exists
-            if (directionsLayer) {
-                map.removeLayer(directionsLayer);
+            if (routingControl) {
+                routingControl.setWaypoints(directionsCache[cacheKey].waypoints);
+                // No need to re-add the control, just update waypoints
             }
-            directionsLayer = directionsCache[cacheKey].layer; // Access the .layer property
-            directionsLayer.addTo(map);
-            showDirections(directionsCache[cacheKey].instructions); // Show cached directions
-
             return;
         }
 
-        const osrmUrl = `http://router.project-osrm.org/route/v1/driving/${userLon},${userLat};${gritBinLon},${gritBinLat}?overview=full&geometries=geojson&steps=true`; // Request steps
+        if (!routingControl) {
+            // Create routing control only if it doesn't exist
+            routingControl = L.Routing.control({
+                waypoints: [userLatLng, gritBinLatLng],
+                routeWhileDragging: false, // Disable rerouting while dragging
+                router: L.Routing.osrmv1({
+                    serviceUrl: 'http://router.project-osrm.org/route/v1'
+                }),
+                show: true,
+            }).addTo(map);
 
-        try {
-            const response = await fetch(osrmUrl);
-            if (!response.ok) {
-                throw new Error(`OSRM API error: ${response.status}`);
-            }
-            const data = await response.json();
-
-            if (data.routes && data.routes.length > 0) {
-                 // Remove existing layer if it exists
-                if (directionsLayer) {
-                    map.removeLayer(directionsLayer);
-                }
-                directionsLayer = L.geoJSON(data.routes[0].geometry, {
-                    style: {
-                        color: 'blue',
-                        weight: 5
-                    }
-                });
-                directionsLayer.addTo(map);
-
-                // Extract and display step-by-step instructions
-                const steps = data.routes[0].legs[0].steps;
-                const instructions = steps.map((step, index) => {
-                    // Use verbal_post_transition_instruction
-                    return {
-                      distance: step.distance,
-                      instruction: step.maneuver.verbal_post_transition_instruction
-                    };
-                });
-
-
+            routingControl.on('routesfound', (e) => {
+                // Cache the route
                 directionsCache[cacheKey] = {
-                    layer: directionsLayer,
-                    instructions: instructions
-                }; // Cache layer and instructions
-                showDirections(instructions);
+                    waypoints: [userLatLng, gritBinLatLng],
+                    routes: e.routes
+                };
+            });
 
-                directionsLayer.on('click', () => {
-                    showDirections(instructions);
-                });
-
-            } else {
-                displayMessage("No route found.");
-            }
-
-        } catch (error) {
-            console.error("Error fetching directions:", error);
-            displayMessage("Error fetching directions.");
+        } else {
+            // If control exists, just set new waypoints
+            routingControl.setWaypoints([userLatLng, gritBinLatLng]);
         }
-    }
-    function showDirections(instructions) {
-        const directionsContent = document.getElementById('directions-content');
-        directionsContent.innerHTML = ''; // Clear previous directions
-
-        const ol = document.createElement('ol');
-        instructions.forEach(instruction => {
-            const li = document.createElement('li');
-            li.textContent = `${instruction.instruction} (${instruction.distance} m)`;
-            ol.appendChild(li);
-        });
-        directionsContent.appendChild(ol);
-        document.getElementById('directions-panel').classList.add('open');
-    }
-
-    function closeDirectionsPanel() {
-        document.getElementById('directions-panel').classList.remove('open');
     }
 
     function displayMessage(message) {
-        // Generic message display, similar to displayLocationError
         const messageDiv = L.DomUtil.create('div', 'info-message');
         messageDiv.innerHTML = message;
         messageDiv.style.backgroundColor = 'white';
@@ -288,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
         messageDiv.style.border = '1px solid black';
         map.getContainer().appendChild(messageDiv);
 
-        // Remove the message after a few seconds
         setTimeout(() => {
             map.getContainer().removeChild(messageDiv);
         }, 5000);

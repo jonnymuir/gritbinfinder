@@ -51,34 +51,17 @@ html, body {
     margin-right: 5px; /* Add some spacing between buttons */
 }
 
-.directions-panel {
-    position: fixed;
-    top: 0;
-    right: -350px; /* Initially hidden off-screen */
-    width: 300px;
-    height: 100%;
-    background-color: white;
-    border-left: 1px solid #ccc;
-    z-index: 1001; /* Ensure it's above the map */
-    transition: right 0.3s ease-in-out; /* Smooth transition */
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-y: auto; /* Allow scrolling if content overflows */
+/* Remove custom directions panel styles */
+.directions-panel, .directions-panel.open, .directions-panel-header, .directions-panel-header .close-button {
+  display: none;
 }
 
-.directions-panel.open {
-    right: 0; /* Slide in when open */
+/* Style adjustments for LRM */
+.leaflet-routing-container {
+    background-color: white; /* Ensure the routing container has a background */
+    z-index: 1000; /* Make sure it's above other elements */
 }
-
-.directions-panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
+.leaflet-routing-alt {
+    overflow-y: auto;
+    max-height: 300px;
 }
-.directions-panel-header .close-button{
-    position: relative;
-    top: unset;
-    right: unset;
-}
-
