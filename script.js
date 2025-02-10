@@ -171,6 +171,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 nearestGritBinLat = currentNearestGritBinLat;
                 nearestGritBinLon = currentNearestGritBinLon;
                 nearestGritBinMarker = L.marker([nearestGritBinLat, nearestGritBinLon], { icon: greenIcon }).addTo(map);
+
+                // Adjust map view to include user and nearest grit bin
+                const bounds = L.latLngBounds(userLocation, [nearestGritBinLat, nearestGritBinLon]);
+                map.fitBounds(bounds, {
+                    padding: [50, 50], // Add some padding around the markers
+                    maxZoom: 15 // Limit the maximum zoom level
+                });
             }
 
         } catch (error) {
