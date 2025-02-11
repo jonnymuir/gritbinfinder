@@ -72,8 +72,6 @@ document.addEventListener('DOMContentLoaded', () => {
     var blueIcon = createIcon('blue');
     var redIcon = createIcon('red');
 
-    // getLocation(); Remove this line
-
     function getLocation() {
         showLoadingIndicator(); // Show indicator immediately
         if (navigator.geolocation) {
@@ -333,4 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bounds = map.getBounds();
         findGritBins(null, null, bounds);
     }
+
+    // Call getLocation to start the process after the DOM is loaded.
+    getLocation();
 });
