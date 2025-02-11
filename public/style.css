@@ -40,6 +40,13 @@ html, body {
 
 .leaflet-bottom.leaflet-left {
     width: 90%; /* Adjust as needed */
+    bottom: 20px; /* Add a default bottom offset */
+}
+
+@media (max-width: 768px) { /* Adjust this breakpoint as needed */
+    .leaflet-bottom.leaflet-left {
+        bottom: 40px; /* Increase bottom offset on smaller screens */
+    }
 }
 
 .leaflet-control-container .leaflet-bottom {
