@@ -11,9 +11,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let nearestGritBinMarker = null; // Store the nearest grit bin's marker
     let initialZoomDone = false; // Flag to track initial zoom
 
+    let initialUserLocation = null;
+    let initialNearestGritBinLat = null;
+    let initialNearestGritBinLon = null;
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> | Directions from <a href="https://project-osrm.org/">OSRM</a>',
     }).addTo(map);
+
+     // Add Reset Map button
+     const resetMapButton = L.control({ position: 'bottomleft' });
+     resetMapButton.onAdd = function (map) {
+         this._div = L.DomUtil.create('div', 'reset-map-button');
+         this._div.innerHTML = '<button>Reset Map</button>';
+         this._div.firstChild.addEventListener('click', resetMap);
+         return this._div;
+     };
+     resetMapButton.addTo(map);
 
     // Add Directions button (modified for LRM)
     const directionsButton = L.control({ position: 'bottomleft' });
@@ -78,6 +92,11 @@ document.addEventListener('DOMContentLoaded', () => {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     userLocation = [position.coords.latitude, position.coords.longitude];
+
+                    // Store the initial user location
+                    if (!initialUserLocation) {
+                        initialUserLocation = [...userLocation]; // Use spread operator to create a copy
+                    }
 
                     // Set the view *before* fetching grit bins
                     map.setView(userLocation, 15);
@@ -196,6 +215,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (userLocation && currentNearestGritBinLat && currentNearestGritBinLon) {
                 nearestGritBinLat = currentNearestGritBinLat;
                 nearestGritBinLon = currentNearestGritBinLon;
+
+                // Store initial nearest grit bin location
+                if (!initialNearestGritBinLat || !initialNearestGritBinLon) {
+                    initialNearestGritBinLat = nearestGritBinLat;
+                    initialNearestGritBinLon = nearestGritBinLon;
+                }
+
                 nearestGritBinMarker = L.marker([nearestGritBinLat, nearestGritBinLon], { icon: greenIcon }).addTo(map);
 
                 // Find the nearest grit bin in the data.elements array
@@ -330,6 +356,43 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoadingIndicator(); // Show indicator when search starts
         const bounds = map.getBounds();
         findGritBins(null, null, bounds);
+    }
+
+    function resetMap() {
+        if (initialUserLocation && initialNearestGritBinLat && initialNearestGritBinLon) {
+            // Clear the existing route, if any
+            if (routingControl) {
+                routingControl.setWaypoints([]); // Clear waypoints
+                map.removeControl(routingControl); // Remove the control from the map
+                routingControl = null; // Reset the variable
+            }
+
+            // Clear directions cache
+            for (let key in directionsCache) {
+                delete directionsCache[key];
+            }
+
+            // Reset the map view
+            const bounds = L.latLngBounds(initialUserLocation, [initialNearestGritBinLat, initialNearestGritBinLon]);
+            const mapWidth = map.getSize().x;
+            const mapHeight = map.getSize().y;
+            const extraPaddingX = Math.round(mapWidth * 0.1);
+            const extraPaddingY = Math.round(mapHeight * 0.1);
+
+            map.fitBounds(bounds, {
+                padding: [50 + extraPaddingY, 50 + extraPaddingX],
+                maxZoom: 15
+            });
+
+            // Reset markers (user and nearest grit bin)
+            if (userMarker) {
+                userMarker.setLatLng(initialUserLocation);
+            }
+            if (nearestGritBinMarker) {
+                nearestGritBinMarker.setLatLng([initialNearestGritBinLat, initialNearestGritBinLon]);
+            }
+            initialZoomDone = true;
+        }
     }
 
     // Call getLocation to start the process after the DOM is loaded.
