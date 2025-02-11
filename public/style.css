@@ -40,6 +40,13 @@ html, body {
 
 .leaflet-bottom.leaflet-left {
     width: 90%; /* Adjust as needed */
+    bottom: 20px; /* Add a default bottom offset */
+}
+
+@media (max-width: 768px) { /* Adjust this breakpoint as needed */
+    .leaflet-bottom.leaflet-left {
+        bottom: 40px; /* Increase bottom offset on smaller screens */
+    }
 }
 
 .leaflet-control-container .leaflet-bottom {
@@ -75,3 +82,16 @@ html, body {
     height: auto;
     max-height: 60px;
 }
+
+#loading-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white */
+    padding: 5px;
+    text-align: center;
+    z-index: 1001; /* Above the map, below popups */
+    display: none; /* Hidden by default */
+}
+
