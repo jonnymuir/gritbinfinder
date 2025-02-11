@@ -72,13 +72,16 @@ document.addEventListener('DOMContentLoaded', () => {
     var blueIcon = createIcon('blue');
     var redIcon = createIcon('red');
 
-    getLocation();
+    // getLocation(); Remove this line
 
     function getLocation() {
+        showLoadingIndicator(); // Show indicator immediately
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     userLocation = [position.coords.latitude, position.coords.longitude];
+
+                    // Set the view *before* fetching grit bins
                     map.setView(userLocation, 15);
 
                     // Add user location marker (only if it doesn't exist)
@@ -87,27 +90,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     findGritBins(position.coords.latitude, position.coords.longitude);
+                    // hideLoadingIndicator() is now called within findGritBins
                 },
                 (error) => {
                     console.error("Geolocation error:", error);
                     displayLocationError();
+                    hideLoadingIndicator(); // Hide indicator on error
                 }
             );
         } else {
             displayLocationError();
+            hideLoadingIndicator(); // Hide indicator if no geolocation
         }
     }
 
-    function displayLocationError() {
-        const errorDiv = L.DomUtil.create('div', 'location-error');
-        errorDiv.innerHTML = 'Location services are unavailable.';
-        errorDiv.style.backgroundColor = 'white';
-        errorDiv.style.padding = '10px';
-        errorDiv.style.border = '1px solid red';
-        map.getContainer().appendChild(errorDiv);
+    function showLoadingIndicator() {
+        document.getElementById('loading-indicator').style.display = 'block';
+    }
+
+    function hideLoadingIndicator() {
+        document.getElementById('loading-indicator').style.display = 'none';
     }
 
     async function findGritBins(latitude, longitude, bounds = null) {
+        // showLoadingIndicator();  Removed from here
         const overpassUrl = 'https://overpass-api.de/api/interpreter';
         let query;
 
@@ -227,6 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Error fetching grit bins:", error);
             displayMessage("Error fetching grit bin data.");
+        } finally {
+            hideLoadingIndicator(); // Hide indicator in all cases (success/error)
         }
     }
 
@@ -321,6 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function searchCurrentArea() {
+        showLoadingIndicator(); // Show indicator when search starts
         const bounds = map.getBounds();
         findGritBins(null, null, bounds);
     }
