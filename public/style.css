@@ -95,18 +95,3 @@ html, body {
     display: none; /* Hidden by default */
 }
 
-.reset-map-button {
-    position: absolute;
-    bottom: 20px; /* Adjust as needed, should match other buttons */
-    left: 10px; /* Adjust as needed */
-    z-index: 1000; /* Ensure it's above the map */
-    background-color: white;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-@media (max-width: 768px) { /* Adjust this breakpoint as needed */
-    .reset-map-button {
-        bottom: 40px; /* Increase bottom offset on smaller screens */
-    }
-}
