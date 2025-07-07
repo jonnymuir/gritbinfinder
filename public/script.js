@@ -86,38 +86,85 @@ document.addEventListener('DOMContentLoaded', () => {
     var blueIcon = createIcon('blue');
     var redIcon = createIcon('red');
 
-    function getLocation() {
+    // Add this function to get query parameters from the URL
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    // Add this function to fetch lat/lon from postcode using Nominatim
+    async function getLatLonFromPostcode(postcode) {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(postcode)}`;
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'Accept-Language': 'en'
+                }
+            });
+            const data = await response.json();
+            if (data && data.length > 0) {
+                return {
+                    lat: parseFloat(data[0].lat),
+                    lon: parseFloat(data[0].lon)
+                };
+            }
+        } catch (e) {
+            console.error("Error fetching postcode location:", e);
+        }
+        return null;
+    }
+
+    // Modified getLocation to optionally use postcode
+    async function getLocation() {
         showLoadingIndicator(); // Show indicator immediately
+
+        const postcode = getQueryParam('postcode');
+        if (postcode) {
+            // If postcode is present, use Nominatim to get lat/lon
+            const location = await getLatLonFromPostcode(postcode);
+            if (location) {
+                userLocation = [location.lat, location.lon];
+                if (!initialUserLocation) {
+                    initialUserLocation = [...userLocation];
+                }
+                map.setView(userLocation, 15);
+                if (!userMarker) {
+                    userMarker = L.marker(userLocation, { icon: redIcon }).addTo(map);
+                } else {
+                    userMarker.setLatLng(userLocation);
+                }
+                findGritBins(location.lat, location.lon);
+                return;
+            } else {
+                displayMessage("Could not find location for postcode.");
+                hideLoadingIndicator();
+                return;
+            }
+        }
+
+        // Fallback to geolocation if no postcode
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     userLocation = [position.coords.latitude, position.coords.longitude];
-
-                    // Store the initial user location
                     if (!initialUserLocation) {
-                        initialUserLocation = [...userLocation]; // Use spread operator to create a copy
+                        initialUserLocation = [...userLocation];
                     }
-
-                    // Set the view *before* fetching grit bins
                     map.setView(userLocation, 15);
-
-                    // Add user location marker (only if it doesn't exist)
                     if (!userMarker) {
                         userMarker = L.marker(userLocation, { icon: redIcon }).addTo(map);
                     }
-
                     findGritBins(position.coords.latitude, position.coords.longitude);
-                    // hideLoadingIndicator() is now called within findGritBins
                 },
                 (error) => {
                     console.error("Geolocation error:", error);
                     displayLocationError();
-                    hideLoadingIndicator(); // Hide indicator on error
+                    hideLoadingIndicator();
                 }
             );
         } else {
             displayLocationError();
-            hideLoadingIndicator(); // Hide indicator if no geolocation
+            hideLoadingIndicator();
         }
     }
 

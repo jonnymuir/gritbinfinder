@@ -1,0 +1,16 @@
+[
+  {
+    "name": "view_gritbins_on_map",
+    "description": "Generates a URL to a map showing council grit bins near a UK postcode. The agent must browse the returned URL to see the results.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "postcode": {
+          "type": "string",
+          "description": "The UK postcode to search, e.g., 'LS28 5UL'."
+        }
+      },
+      "required": ["postcode"]
+    }
+  }
+]
