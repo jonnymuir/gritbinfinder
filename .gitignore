@@ -23,7 +23,7 @@ ENV/
 .vscode/
 
 # macOS system files
-# .DS_Store
+.DS_Store
 
 # Log files
 *.log
