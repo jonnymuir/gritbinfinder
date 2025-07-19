@@ -59,6 +59,9 @@ This file launches a FastMCP server that exposes a tool for interacting with the
 python gritbin_mcp_server.py
 ```
 
+<img width="712" height="599" alt="image" src="https://github.com/user-attachments/assets/632f03c5-81ff-4d73-818c-e86c8482bdf8" />
+
+
 #### Run the Agent CLI
 
 This file starts a simple command-line agent that talks to the MCP server and interacts with the GritBin Finder website.
@@ -66,6 +69,15 @@ This file starts a simple command-line agent that talks to the MCP server and in
 ```bash
 python main.py
 ```
+
+You will need to get you api keys for gemini and logfire sorted first and in the .env file then you get a very simple agent look implemented in pydantic-ai which will attach to the mcp server for its gritbin tooling.
+
+<img width="978" height="612" alt="image" src="https://github.com/user-attachments/assets/4e2a3cde-6806-4168-9012-af4bb5bfa134" />
+
+And then if you look in the logfire logs you'll see the whole interaction.
+
+<img width="1481" height="679" alt="image" src="https://github.com/user-attachments/assets/361c446e-8f0c-4faf-979b-b734e58f66e5" />
+
 
 ## About the Example Files
 
