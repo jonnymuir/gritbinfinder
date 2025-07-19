@@ -15,3 +15,7 @@ The main user journey should be as follows:
 - There should also be a help button in the bottom left of the map that pops open a windows explaining briefly what the site does, along with a link out to more information hosted on the about page
 
 See [GritBinFinderLLMDesignBrief](doc/GritBinFinderLLMDesignBrief.md)
+
+## MCP Integration Example
+
+We have added an example MCP (Multi-Component Process) in the [`mcp`](./mcp) subfolder. This MCP can interact with the Grit Bin Finder website, demonstrating how MCPs can be used to extend and automate interactions with the app. This is provided as an example to explore the capabilities of MCPs and how they can be integrated with

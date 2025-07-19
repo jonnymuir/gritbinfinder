@@ -27,7 +27,15 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Create and Populate Your `.env` File
+### 4. Install Playwright Browsers
+
+After installing dependencies, you must also install the Playwright browser binaries:
+
+```bash
+playwright install
+```
+
+### 5. Create and Populate Your `.env` File
 
 Create a `.env` file in this directory with the following content:
 
@@ -41,7 +49,7 @@ GRITBINFINDER_URL=https://gritbinfinder-476im3hk7-jonny-muirs-projects.vercel.ap
 - **LOGFIRE_TOKEN**: Sign up at [Logfire](https://logfire.ai/) and get your API token from your dashboard.
 - **GRITBINFINDER_URL**: The base URL for the GritBin Finder website. You can use the default provided above or set your own if running a different instance.
 
-### 5. Run the Example Files
+### 6. Run the Example Files
 
 #### Start the MCP Server
 
