@@ -4,6 +4,10 @@ from pydantic import BaseModel, Field
 import asyncio
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 mcp = FastMCP(name="GritBin MCP Server")
 
@@ -116,7 +120,7 @@ async def view_gritbins_on_map(input: PostcodeInput) -> dict:
     Visits the grit bin finder page, runs JavaScript, and extracts info from the nearest grit bin pin.
     Returns a dict with popup HTML and extracted links.
     """
-    base_url = "https://gritbinfinder-476im3hk7-jonny-muirs-projects.vercel.app"
+    base_url = os.getenv("GRITBINFINDER_URL", "https://gritbinfinder-476im3hk7-jonny-muirs-projects.vercel.app")
     generated_url = f"{base_url}/?postcode={input.postcode}"
 
     async with async_playwright() as p:

@@ -34,10 +34,12 @@ Create a `.env` file in this directory with the following content:
 ```
 GOOGLE_API_KEY=your-google-api-key-here
 LOGFIRE_TOKEN=your-logfire-token-here
+GRITBINFINDER_URL=https://gritbinfinder-476im3hk7-jonny-muirs-projects.vercel.app
 ```
 
 - **GOOGLE_API_KEY**: Get this from your [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
 - **LOGFIRE_TOKEN**: Sign up at [Logfire](https://logfire.ai/) and get your API token from your dashboard.
+- **GRITBINFINDER_URL**: The base URL for the GritBin Finder website. You can use the default provided above or set your own if running a different instance.
 
 ### 5. Run the Example Files
 
