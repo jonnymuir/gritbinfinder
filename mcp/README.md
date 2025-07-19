@@ -11,7 +11,7 @@ Enjoy!
 ### 1. Change to the `mcp` Directory
 
 ```bash
-cd /Users/jonnymuir/Documents/Projects/gritbinfinder/mcp
+cd mcp
 ```
 
 ### 2. Create and Activate a Virtual Environment
